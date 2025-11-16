@@ -342,3 +342,27 @@ class ImprovedCNNMFCC:
                 'Optimized regularization'
             ]
         }
+    
+    def export_model_summary(self, filepath='model_architecture.txt'):
+        """
+        Export detailed model architecture to text file
+        Useful for documentation and reporting
+        
+        Args:
+            filepath: Path to save the summary
+        """
+        with open(filepath, 'w') as f:
+            # Redirect stdout to file
+            self.model.summary(print_fn=lambda x: f.write(x + '\n'))
+            
+            # Add additional info
+            f.write('\n' + '='*80 + '\n')
+            f.write('HYPERPARAMETERS\n')
+            f.write('='*80 + '\n')
+            
+            hyperparams = self.get_hyperparameters()
+            for key, value in hyperparams.items():
+                f.write(f'{key}: {value}\n')
+        
+        print(f"Model summary exported to {filepath}")
+        return filepath
