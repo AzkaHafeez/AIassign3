@@ -1,4 +1,65 @@
+┌─────────────────────────────────────────────────────────┐
+│                    Audio Input (5s @ 16kHz)             │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│              MFCC Feature Extraction                     │
+│            (40 coefficients, normalized)                 │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│         SpecAugment Augmentation (Training Only)         │
+│      • Frequency Masking (param=8)                       │
+│      • Time Masking (param=25)                           │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│              CNN Feature Learning                        │
+│   Conv2D(16) → BN → MaxPool → Dropout(0.3)             │
+│   Conv2D(32) → BN → MaxPool → Dropout(0.3)             │
+│   Conv2D(64) → BN                                       │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│          Temporal Attention Mechanism                    │
+│    (Focus on discriminative time segments)               │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│         Classification Head                              │
+│   Dense(128) → Dropout(0.5) → Softmax(8)               │
+└─────────────────────────────────────────────────────────┘
 # Audio Classification - Improved CNN-MFCC Model
+
+# Prerequisities
+# Python 3.8 or higher required
+python --version
+
+# Install dependencies
+pip install -r requirements.txt
+# Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install requirements
+pip install tensorflow numpy librosa scikit-learn matplotlib seaborn pandas tqdm
+# Dataset Structure
+SAND_Challenge_task1_dataset/
+└── task1/
+    └── training/
+        ├── phonationA/  # Vowel 'A' sounds
+        ├── phonationE/  # Vowel 'E' sounds
+        ├── phonationI/  # Vowel 'I' sounds
+        ├── phonationO/  # Vowel 'O' sounds
+        ├── phonationU/  # Vowel 'U' sounds
+        ├── rhythmKA/    # Syllable 'KA'
+        ├── rhythmPA/    # Syllable 'PA'
+        └── rhythmTA/    # Syllable 'TA'
 
 ## Overview
 This project implements an improved CNN-MFCC model with Temporal Attention and SpecAugment for audio classification. It's designed for Assignment 3, focusing on incremental improvements over a baseline model.
@@ -227,3 +288,6 @@ ls -lh results/
 ## License
 
 This is an academic assignment project.
+
+# Basic Training:
+bashpython run_experiments.py --data_path SAND_Challenge_task1_dataset/task1/training
