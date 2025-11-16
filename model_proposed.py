@@ -366,3 +366,62 @@ class ImprovedCNNMFCC:
         
         print(f"Model summary exported to {filepath}")
         return filepath
+    
+    def get_current_learning_rate(self):
+        """
+        Get current learning rate from optimizer
+        Useful for monitoring during training
+        
+        Returns:
+            Current learning rate as float
+        """
+        if self.model is None:
+            return None
+        
+        lr = float(self.model.optimizer.learning_rate)
+        return lr
+    
+    def calculate_model_size(self):
+        """
+        Calculate model size in memory (MB)
+        Useful for deployment planning
+        
+        Returns:
+            Dictionary with size information
+        """
+        if self.model is None:
+            return None
+        
+        # Calculate trainable and non-trainable params
+        trainable_params = sum([tf.size(w).numpy() for w in self.model.trainable_weights])
+        non_trainable_params = sum([tf.size(w).numpy() for w in self.model.non_trainable_weights])
+        total_params = trainable_params + non_trainable_params
+        
+        # Calculate size (4 bytes per float32 parameter)
+        size_mb = (total_params * 4) / (1024 ** 2)
+        
+        size_info = {
+            'total_parameters': int(total_params),
+            'trainable_parameters': int(trainable_params),
+            'non_trainable_parameters': int(non_trainable_params),
+            'size_mb': round(size_mb, 2),
+            'size_kb': round(size_mb * 1024, 2)
+        }
+        
+        return size_info
+    
+    def print_model_size(self):
+        """Print formatted model size information"""
+        size_info = self.calculate_model_size()
+        
+        if size_info:
+            print("\n" + "="*60)
+            print("MODEL SIZE ANALYSIS")
+            print("="*60)
+            print(f"Total Parameters: {size_info['total_parameters']:,}")
+            print(f"Trainable Parameters: {size_info['trainable_parameters']:,}")
+            print(f"Non-trainable Parameters: {size_info['non_trainable_parameters']:,}")
+            print(f"Model Size: {size_info['size_mb']} MB ({size_info['size_kb']} KB)")
+            print("="*60)
+        
+        return size_info
