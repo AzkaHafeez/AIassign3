@@ -318,7 +318,7 @@ def main():
     parser.add_argument('--history_log', type=str, required=True,
                        help='Path to training history CSV')
     parser.add_argument('--results_json', type=str,
-                       help='Path to results JSON file')
+                       help='Path to results JSON file (from training or evaluation)')
     parser.add_argument('--plots_dir', type=str, default='plots',
                        help='Directory to save analysis plots')
     
@@ -338,6 +338,28 @@ def main():
     # Analyze training dynamics
     analysis_results = analyzer.analyze_training_dynamics(history_df)
     
+    # Show summary from results JSON if provided
+    if args.results_json and os.path.isfile(args.results_json):
+        try:
+            with open(args.results_json, 'r') as f:
+                results = json.load(f)
+            print("\n" + "="*80)
+            print("TRAIN/TEST SUMMARY")
+            print("="*80)
+            if 'test_results' in results:
+                tr = results['test_results']
+                print(f"Test Accuracy: {tr.get('accuracy', 'n/a')}")
+                print(f"Test F1 (macro): {tr.get('f1_macro', 'n/a')}")
+                if 'loss' in tr:
+                    print(f"Test Loss: {tr.get('loss', 'n/a')}")
+            if 'training_results' in results:
+                trn = results['training_results']
+                print(f"Best Val Acc: {trn.get('best_val_accuracy', 'n/a')}")
+                print(f"Best Val Loss: {trn.get('best_val_loss', 'n/a')}")
+                print(f"Total Epochs: {trn.get('total_epochs', 'n/a')}")
+        except Exception as e:
+            print(f"Warning: could not read results_json: {e}")
+
     # Generate improvement suggestions
     analyzer.suggest_improvements(analysis_results)
     

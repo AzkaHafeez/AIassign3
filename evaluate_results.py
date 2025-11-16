@@ -403,6 +403,14 @@ def main():
     print("="*80)
     
     # Validate inputs
+    # If model_path not provided, auto-pick latest .h5 in results_dir
+    if not args.model_path:
+        candidates = [os.path.join(args.results_dir, f) for f in os.listdir(args.results_dir) if f.endswith('.h5')]
+        if candidates:
+            args.model_path = max(candidates, key=os.path.getmtime)
+            print(f"Auto-selected latest model: {args.model_path}")
+        else:
+            raise FileNotFoundError("No model_path provided and no .h5 files found in results directory.")
     if not os.path.isfile(args.model_path):
         raise FileNotFoundError(f"Model file not found: {args.model_path}")
     if args.history_log and not os.path.isfile(args.history_log):
@@ -411,7 +419,7 @@ def main():
     # Load data
     print("\nLoading dataset...")
     loader = AudioDataLoader(args.data_path, sample_rate=16000)
-    audio_data, labels, _ = loader.load_dataset(max_duration=5.0)
+    audio_data, labels, file_paths = loader.load_dataset(max_duration=5.0)
     class_names = loader.get_class_names()
     
     # Split data (same split as training)
@@ -420,6 +428,7 @@ def main():
     
     X_test = audio_data[test_idx]
     y_test = labels[test_idx]
+    test_files = [file_paths[i] for i in test_idx]
     
     print(f"Test set: {len(X_test)} samples")
     
@@ -445,13 +454,18 @@ def main():
     print("="*60)
     
     # Confusion matrix
-    cm_path = os.path.join(args.plots_dir, 'confusion_matrix_improved.pdf')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    cm_path = os.path.join(args.plots_dir, f'confusion_matrix_improved_{timestamp}.pdf')
     plot_confusion_matrix(y_test, y_pred, class_names, cm_path,
+                         title=f'Improved Model - Accuracy: {test_acc:.2%} | F1: {test_f1:.4f}')
+    # Save a PNG variant for convenience
+    cm_path_png = os.path.join(args.plots_dir, f'confusion_matrix_improved_{timestamp}.png')
+    plot_confusion_matrix(y_test, y_pred, class_names, cm_path_png,
                          title=f'Improved Model - Accuracy: {test_acc:.2%} | F1: {test_f1:.4f}')
     
     # Comprehensive training analysis (4 subplots)
     if args.history_log and os.path.exists(args.history_log):
-        history_path = os.path.join(args.plots_dir, 'training_analysis.pdf')
+        history_path = os.path.join(args.plots_dir, f'training_analysis_{timestamp}.pdf')
         plot_training_history(
             history_file=args.history_log,
             save_path=history_path,
@@ -465,11 +479,11 @@ def main():
         )
     
     # Per-class metrics (separate detailed plot)
-    metrics_path = os.path.join(args.plots_dir, 'per_class_metrics.pdf')
+    metrics_path = os.path.join(args.plots_dir, f'per_class_metrics_{timestamp}.pdf')
     plot_per_class_metrics(y_test, y_pred, class_names, metrics_path)
     
     # Comparison plot (separate plot)
-    comparison_path = os.path.join(args.plots_dir, 'baseline_vs_improved.pdf')
+    comparison_path = os.path.join(args.plots_dir, f'baseline_vs_improved_{timestamp}.pdf')
     plot_comparison(test_acc, test_f1, args.baseline_acc, args.baseline_f1, comparison_path)
     
     # Save evaluation results
@@ -495,7 +509,17 @@ def main():
                                                        zero_division=0)
     }
     
-    eval_file = os.path.join(args.results_dir, 'evaluation_results.json')
+    # Save per-sample predictions CSV for downstream analysis
+    preds_csv = os.path.join(args.results_dir, f'predictions_improved_{timestamp}.csv')
+    import csv
+    with open(preds_csv, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(["file", "true_label", "pred_label", "true_name", "pred_name"])
+        for fp, yt, yp in zip(test_files, y_test, y_pred):
+            writer.writerow([fp, int(yt), int(yp), class_names[int(yt)], class_names[int(yp)]])
+    print(f"✓ Predictions saved to {preds_csv}")
+
+    eval_file = os.path.join(args.results_dir, f'evaluation_results_{timestamp}.json')
     with open(eval_file, 'w') as f:
         json.dump(eval_results, f, indent=4)
     

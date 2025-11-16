@@ -46,6 +46,9 @@ plots/
 *.csv
 *.json
 
+# Datasets (large, do not version)
+SAND_Challenge_task1_dataset/
+
 # IDE/editor
 .vscode/
 .idea/
