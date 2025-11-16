@@ -1,0 +1,54 @@
+{
+    "model": "Improved_CNN_MFCC_with_Attention",
+    "assignment": "Assignment 3",
+    "hyperparameters": {
+        "model_type": "Improved CNN-MFCC with Attention",
+        "num_classes": 8,
+        "learning_rate": 0.0005,
+        "architecture": "3 Conv2D blocks + Attention + 1 Dense layer",
+        "conv_filters": [
+            16,
+            32,
+            64
+        ],
+        "dense_units": [
+            128
+        ],
+        "dropout_rates": [
+            0.3,
+            0.3,
+            0.5,
+            0.5
+        ],
+        "regularization": "L2 (0.01)",
+        "attention": "Temporal Attention",
+        "pooling": "MaxPooling2D",
+        "batch_normalization": true,
+        "improvements": [
+            "SpecAugment data augmentation",
+            "Temporal Attention mechanism",
+            "Optimized regularization"
+        ]
+    },
+    "training_args": {
+        "data_path": "D:\\downloads\\SAND_Challenge_task1_dataset\\task1\\training",
+        "batch_size": 32,
+        "epochs": 20,
+        "learning_rate": 0.0005,
+        "max_duration": 5.0,
+        "n_mfcc": 40,
+        "use_specaugment": true,
+        "results_dir": "results"
+    },
+    "test_results": {
+        "loss": 0.9708156585693359,
+        "accuracy": 0.825421154499054,
+        "f1_macro": 0.8151222499233556
+    },
+    "training_results": {
+        "best_val_accuracy": 0.8256880640983582,
+        "best_val_loss": 0.8965567946434021,
+        "total_epochs": 20
+    },
+    "timestamp": "20251116_232242"
+}

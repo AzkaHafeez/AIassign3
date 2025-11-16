@@ -1,39 +1,3 @@
-┌─────────────────────────────────────────────────────────┐
-│                    Audio Input (5s @ 16kHz)             │
-└─────────────────┬───────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────┐
-│              MFCC Feature Extraction                     │
-│            (40 coefficients, normalized)                 │
-└─────────────────┬───────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────┐
-│         SpecAugment Augmentation (Training Only)         │
-│      • Frequency Masking (param=8)                       │
-│      • Time Masking (param=25)                           │
-└─────────────────┬───────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────┐
-│              CNN Feature Learning                        │
-│   Conv2D(16) → BN → MaxPool → Dropout(0.3)             │
-│   Conv2D(32) → BN → MaxPool → Dropout(0.3)             │
-│   Conv2D(64) → BN                                       │
-└─────────────────┬───────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────┐
-│          Temporal Attention Mechanism                    │
-│    (Focus on discriminative time segments)               │
-└─────────────────┬───────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────┐
-│         Classification Head                              │
-│   Dense(128) → Dropout(0.5) → Softmax(8)               │
-└─────────────────────────────────────────────────────────┘
 # Audio Classification - Improved CNN-MFCC Model
 
 # Prerequisities
@@ -242,8 +206,8 @@ python evaluate_results.py \
 
 ## Expected Results
 
-- **Baseline Accuracy**: ~52.8%
-- **Improved Accuracy**: ~64-66% (+10-12% improvement)
+- **Baseline Accuracy**: ~64.342%
+- **Improved Accuracy**: ~76.6% (+10-12% improvement)
 - **Training Time**: ~15-20 minutes (GPU) / ~2-3 hours (CPU)
 - **Model Size**: ~50K parameters
 
