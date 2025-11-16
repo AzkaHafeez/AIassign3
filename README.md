@@ -1,18 +1,21 @@
 # Audio Classification - Improved CNN-MFCC Model
 
-# Prerequisities
-# Python 3.8 or higher required
+## Prerequisites
+- Python 3.8 or higher
+
+Check your Python version (Windows cmd):
+```
 python --version
+```
 
-# Install dependencies
-pip install -r requirements.txt
-# Create virtual environment (recommended)
+## Setup (Windows cmd)
+```
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-# Install requirements
-pip install tensorflow numpy librosa scikit-learn matplotlib seaborn pandas tqdm
-# Dataset Structure
+## Dataset Structure
 SAND_Challenge_task1_dataset/
 └── task1/
     └── training/
@@ -35,20 +38,9 @@ This project implements an improved CNN-MFCC model with Temporal Attention and S
 - **Expected Improvement**: +10-12% accuracy over baseline
 
 ## Requirements
-
-```bash
-pip install tensorflow numpy librosa scikit-learn matplotlib seaborn pandas tqdm
-```
-
-### Detailed Requirements
-- Python 
-- TensorFlow 
-- librosa
-- scikit-learn
-- matplotlib
-- seaborn
-- pandas
-- tqdm
+- `tensorflow` (2.10–2.15)
+- `numpy`, `librosa`, `scikit-learn`, `matplotlib`, `seaborn`, `pandas`, `tqdm`
+Install via `requirements.txt` as shown above.
 
 ## Project Structure
 
@@ -77,20 +69,21 @@ pip install tensorflow numpy librosa scikit-learn matplotlib seaborn pandas tqdm
 
 ### 1. Training the Model
 
-**Basic usage:**
-```bash
+**Basic usage (Windows cmd):**
+```
 python run_experiments.py --data_path SAND_Challenge_task1_dataset/task1/training
 ```
 
 **With custom parameters:**
-```bash
-python run_experiments.py \
-    --data_path SAND_Challenge_task1_dataset/task1/training \
-    --epochs 60 \
-    --batch_size 32 \
-    --learning_rate 0.0005 \
-    --n_mfcc 40 \
-    --use_specaugment \
+```
+python run_experiments.py ^
+    --data_path SAND_Challenge_task1_dataset/task1/training ^
+    --epochs 60 ^
+    --batch_size 32 ^
+    --learning_rate 0.0005 ^
+    --n_mfcc 40 ^
+    --specaugment ^
+    --seed 42 ^
     --results_dir results
 ```
 
@@ -101,27 +94,30 @@ python run_experiments.py \
 - `--learning_rate`: Learning rate (default: 0.0005)
 - `--max_duration`: Maximum audio duration in seconds (default: 5.0)
 - `--n_mfcc`: Number of MFCC coefficients (default: 40)
-- `--use_specaugment`: Enable SpecAugment augmentation (default: True)
+- `--specaugment` / `--no-specaugment`: Toggle SpecAugment (default: enabled)
+- `--seed`: Random seed for reproducibility (default: 42)
 - `--results_dir`: Directory to save results (default: `results`)
+ - `--export_summary`: Save model architecture summary to results
 
 ### 2. Evaluating the Model
 
-**Basic evaluation:**
-```bash
-python evaluate_results.py \
-    --model_path results/best_model_improved_20241115_143022.h5 \
+**Basic evaluation (Windows cmd):**
+```
+python evaluate_results.py ^
+    --model_path results/best_model_improved_YYYYMMDD_HHMMSS.h5 ^
     --baseline_acc 0.528
 ```
 
 **Full evaluation with all options:**
-```bash
-python evaluate_results.py \
-    --data_path SAND_Challenge_task1_dataset/task1/training \
-    --model_path results/best_model_improved_20241115_143022.h5 \
-    --history_log results/training_log_improved_20241115_143022.csv \
-    --baseline_acc 0.528 \
-    --baseline_f1 0.471 \
-    --plots_dir plots \
+```
+python evaluate_results.py ^
+    --data_path SAND_Challenge_task1_dataset/task1/training ^
+    --model_path results/best_model_improved_YYYYMMDD_HHMMSS.h5 ^
+    --history_log results/training_log_improved_YYYYMMDD_HHMMSS.csv ^
+    --baseline_acc 0.528 ^
+    --baseline_f1 0.471 ^
+    --seed 42 ^
+    --plots_dir plots ^
     --results_dir results
 ```
 
@@ -190,17 +186,17 @@ Output (8 classes, Softmax)
 ## Example Workflow
 
 ```bash
-# Step 1: Train the model
-python run_experiments.py \
-    --data_path SAND_Challenge_task1_dataset/task1/training \
-    --epochs 60 \
+REM Step 1: Train the model
+python run_experiments.py ^
+    --data_path SAND_Challenge_task1_dataset/task1/training ^
+    --epochs 60 ^
     --batch_size 32
 
-# Step 2: Evaluate and visualize (use the actual filename from Step 1)
-python evaluate_results.py \
-    --model_path results/best_model_improved_20241115_143022.h5 \
-    --history_log results/training_log_improved_20241115_143022.csv \
-    --baseline_acc 0.528 \
+REM Step 2: Evaluate and visualize (use the actual filename from Step 1)
+python evaluate_results.py ^
+    --model_path results/best_model_improved_YYYYMMDD_HHMMSS.h5 ^
+    --history_log results/training_log_improved_YYYYMMDD_HHMMSS.csv ^
+    --baseline_acc 0.528 ^
     --baseline_f1 0.471
 ```
 
@@ -252,6 +248,3 @@ ls -lh results/
 ## License
 
 This is an academic assignment project.
-
-# Basic Training:
-bashpython run_experiments.py --data_path SAND_Challenge_task1_dataset/task1/training

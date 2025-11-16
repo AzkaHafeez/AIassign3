@@ -9,6 +9,7 @@ Usage:
 import os
 import argparse
 import json
+import random
 import numpy as np
 import librosa
 import tensorflow as tf
@@ -18,6 +19,9 @@ from tqdm import tqdm
 import re
 
 from model_proposed import ImprovedCNNMFCC
+
+# Reduce TensorFlow verbosity
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 
 # ============================================================
 # DATA LOADER
@@ -226,6 +230,21 @@ def setup_gpu():
 
 
 # ============================================================
+# REPRODUCIBILITY
+# ============================================================
+
+def set_global_seed(seed: int = 42):
+    """Set seeds for Python, NumPy, and TensorFlow for reproducibility."""
+    try:
+        random.seed(seed)
+        np.random.seed(seed)
+        tf.random.set_seed(seed)
+        print(f"Seeds set for reproducibility (seed={seed}).")
+    except Exception as e:
+        print(f"Warning: could not set full reproducibility: {e}")
+
+
+# ============================================================
 # MAIN EXPERIMENT
 # ============================================================
 
@@ -244,21 +263,31 @@ def main():
                        help='Maximum audio duration in seconds')
     parser.add_argument('--n_mfcc', type=int, default=40,
                        help='Number of MFCC coefficients')
-    parser.add_argument('--use_specaugment', action='store_true', default=True,
-                       help='Use SpecAugment data augmentation')
+    # SpecAugment boolean flags (enable/disable)
+    spec_group = parser.add_mutually_exclusive_group()
+    spec_group.add_argument('--specaugment', dest='use_specaugment', action='store_true', help='Enable SpecAugment (default)')
+    spec_group.add_argument('--no-specaugment', dest='use_specaugment', action='store_false', help='Disable SpecAugment')
+    parser.set_defaults(use_specaugment=True)
     parser.add_argument('--results_dir', type=str, default='results',
                        help='Directory to save results')
+    parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility')
+    parser.add_argument('--export_summary', action='store_true', help='Export model architecture summary to results directory')
     
     args = parser.parse_args()
     
     # Setup
     os.makedirs(args.results_dir, exist_ok=True)
     os.makedirs('plots', exist_ok=True)
+    if not os.path.isdir(args.data_path):
+        raise FileNotFoundError(f"Data path not found: {args.data_path}")
     
     print("="*80)
     print("ASSIGNMENT 3: IMPROVED CNN-MFCC EXPERIMENTS")
     print("="*80)
     
+    # Set seeds early
+    set_global_seed(args.seed)
+
     setup_gpu()
     
     # Load data
@@ -270,7 +299,7 @@ def main():
     
     # Split data
     X_train, X_val, X_test, y_train, y_val, y_test = create_data_split(
-        audio_data, labels, test_size=0.30, val_size=0.20
+        audio_data, labels, test_size=0.30, val_size=0.20, random_state=args.seed
     )
     
     # Extract MFCC features
@@ -318,6 +347,9 @@ def main():
         checkpoint_path=checkpoint_path,
         log_path=log_path
     )
+    if args.export_summary:
+        summary_path = os.path.join(args.results_dir, f'model_summary_{timestamp}.txt')
+        model.export_model_summary(summary_path)
     
     # Evaluate
     print("\n" + "="*60)
@@ -331,11 +363,14 @@ def main():
     )
     
     # Save results
+    class_names = loader.get_class_names()
+    id2class = {i: name for i, name in enumerate(class_names)}
     results = {
         'model': 'Improved_CNN_MFCC_with_Attention',
         'assignment': 'Assignment 3',
         'hyperparameters': model.get_hyperparameters(),
         'training_args': vars(args),
+        'class_mapping': id2class,
         'test_results': {
             'loss': float(test_loss),
             'accuracy': float(test_acc),

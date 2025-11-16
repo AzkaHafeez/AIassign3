@@ -390,6 +390,8 @@ def main():
                        help='Directory to save plots')
     parser.add_argument('--results_dir', type=str, default='results',
                        help='Directory to save results')
+    parser.add_argument('--seed', type=int, default=42,
+                       help='Random seed to match training split')
     
     args = parser.parse_args()
     
@@ -400,6 +402,12 @@ def main():
     print("EVALUATING IMPROVED MODEL")
     print("="*80)
     
+    # Validate inputs
+    if not os.path.isfile(args.model_path):
+        raise FileNotFoundError(f"Model file not found: {args.model_path}")
+    if args.history_log and not os.path.isfile(args.history_log):
+        print(f"Warning: history_log not found: {args.history_log}. Continuing without training curves.")
+
     # Load data
     print("\nLoading dataset...")
     loader = AudioDataLoader(args.data_path, sample_rate=16000)
@@ -407,7 +415,7 @@ def main():
     class_names = loader.get_class_names()
     
     # Split data (same split as training)
-    sss1 = StratifiedShuffleSplit(n_splits=1, test_size=0.30, random_state=42)
+    sss1 = StratifiedShuffleSplit(n_splits=1, test_size=0.30, random_state=args.seed)
     _, test_idx = next(sss1.split(audio_data, labels))
     
     X_test = audio_data[test_idx]

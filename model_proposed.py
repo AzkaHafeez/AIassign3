@@ -368,18 +368,27 @@ class ImprovedCNNMFCC:
         return filepath
     
     def get_current_learning_rate(self):
+        """Return the current learning rate as a float if available.
+
+        Handles constant floats, `tf.Variable`, and schedules that expose a
+        current value via `.learning_rate`.
         """
-        Get current learning rate from optimizer
-        Useful for monitoring during training
-        
-        Returns:
-            Current learning rate as float
-        """
-        if self.model is None:
+        if self.model is None or self.model.optimizer is None:
             return None
-        
-        lr = float(self.model.optimizer.learning_rate)
-        return lr
+
+        lr = self.model.optimizer.learning_rate
+        try:
+            # tf.Variable or EagerTensor
+            if hasattr(lr, 'numpy'):
+                return float(lr.numpy())
+            # Fallback to Keras backend get_value
+            return float(tf.keras.backend.get_value(lr))
+        except Exception:
+            try:
+                # Older optimizers may use `.lr`
+                return float(tf.keras.backend.get_value(self.model.optimizer.lr))
+            except Exception:
+                return None
     
     def calculate_model_size(self):
         """
