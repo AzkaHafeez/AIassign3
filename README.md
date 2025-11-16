@@ -16,9 +16,9 @@ pip install tensorflow numpy librosa scikit-learn matplotlib seaborn pandas tqdm
 ```
 
 ### Detailed Requirements
-- Python 3.7+
-- TensorFlow 2.x
-- librosa 0.9+
+- Python 
+- TensorFlow 
+- librosa
 - scikit-learn
 - matplotlib
 - seaborn
@@ -224,12 +224,6 @@ ls -lh results/
 - MFCC features are normalized per sample
 - Early stopping and learning rate reduction are applied automatically
 
-## Citation
-
-If you use this code, please reference:
-- **SpecAugment**: Park et al. (2019) "SpecAugment: A Simple Data Augmentation Method for ASR"
-- **Attention Mechanism**: Standard temporal attention for sequence modeling
-
 ## License
 
-This is an academic assignment project. Please follow your institution's academic integrity guidelines.
+This is an academic assignment project.
